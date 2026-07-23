@@ -4,20 +4,15 @@ from flask import Flask
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# ১. Render-কে Active রাখার জন্য Flask Server Setup
+# ১. Render Active রাখার জন্য Flask Web App
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Bot is Running 24/7!"
-
-def run_flask():
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    return "Food Delivery Bot is Running 24/7!"
 
 # ২. Telegram Bot Setup
-# BotFather থেকে পাওয়া আপনার অরিজিনাল বট টোকেনটি এখানে বসাবেন
-BOT_TOKEN = 8662076126:AAF-3f9Qwg6AujM9c-qE99QLUl_Quv0uuEA
+BOT_TOKEN = "8662076126:AAF-3f9Qwg6AujM9c-qE99QLUl_Quv0uuEA" 
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # /start কমান্ড হ্যান্ডলার
@@ -27,7 +22,7 @@ def send_welcome(message):
     markup.row_width = 2
     
     # ফুড মেনু বাটন
-    btn1 = InlineKeyboardButton("🍕 Burger - ৳180", callback_data="order_burger")
+    btn1 = InlineKeyboardButton("🍔 Burger - ৳180", callback_data="order_burger")
     btn2 = InlineKeyboardButton("🍕 Pizza - ৳350", callback_data="order_pizza")
     markup.add(btn1, btn2)
     
@@ -47,9 +42,11 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "পিজ্জা সিলেক্ট করা হয়েছে!")
         bot.send_message(call.message.chat.id, "🍕 পিজ্জা অর্ডার নিশ্চিত করতে আপনার ডেলিভারি এড্রেস ও ফোন নম্বর লিখুন:")
 
-if __name__ == "__main__":
-    # ব্যাকগ্রাউন্ডে Flask সার্ভার চালু করা
-    threading.Thread(target=run_flask).start()
-    
-    # টেলিগ্রাম বট স্টার্ট করা
-    bot.infinity_polling()
+# ব্যাকগ্রাউন্ডে টেলিগ্রাম বটের Polling রান করা
+def run_bot():
+    bot.infinity_polling(skip_pending=True)
+
+# থ্রেড চালনা
+polling_thread = threading.Thread(target=run_bot)
+polling_thread.daemon = True
+polling_thread.start()
